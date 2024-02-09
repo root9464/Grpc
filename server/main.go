@@ -25,6 +25,11 @@ func (s *server) HelloWorld(ctx context.Context, in *pb.HelloWorldResponse) (*pb
 	return &pb.HelloWorldResponse{Message: in.Message}, nil
 }
 
+func (s *server) GetAllPosts(ctx context.Context, in *pb.Empty) (*pb.Posts, error) {
+	log.Printf("Received")
+	return &pb.Posts{}, nil
+}
+
 func main() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
