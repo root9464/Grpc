@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package posts;
+option go_package = "./";
+
+service PostsService {
+    rpc GetAllPosts (Empty) returns (Posts) {}
+    rpc GetPost (FindOnePostDto) returns (Post) {}
+    rpc CreatePost (CreatePostDto) returns (Post) {}
+    rpc UpdatePost (UpdatePostDto) returns (Post) {}
+    rpc DeletePost (FindOnePostDto) returns (Post) {}
+    rpc HelloWorld (HelloWorldResponse) returns (HelloWorldResponse) {}
+
+}
+
+message Empty {}
+
+message FindOnePostDto {
+    int32 id = 1;
+}
+
+message HelloWorldResponse {
+    string message = 1;
+}
+
+message CreatePostDto {
+    string title = 1;
+    string content = 2;
+}
+
+message UpdatePostDto {
+    int32 id = 1;
+    optional string title = 2;
+    optional string content = 3;
+}
+
+message Posts {
+    repeated Post Posts = 1;
+}
+
+
+message Post {
+    int32 id = 1;
+    string title = 2;
+    string content = 3;
+}
