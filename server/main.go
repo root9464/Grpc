@@ -9,33 +9,32 @@ import (
 	pb "root/proto"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var (
-	port = flag.Int("port", 50051, "The server port")
+	port = flag.Int("port", 3001, "The server port")
 )
 
-// server is used to implement helloworld.GreeterServer.
 type server struct {
 	pb.UnimplementedPostsServiceServer
 }
 
-// SayHello implements helloworld.GreeterServer
 func (s *server) HelloWorld(ctx context.Context, in *pb.HelloWorldResponse) (*pb.HelloWorldResponse, error) {
 	log.Printf("Received")
 	return &pb.HelloWorldResponse{Message: in.Message}, nil
 }
 
 func main() {
-	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		panic(err)
 	}
-	s := grpc.NewServer()
-	pb.RegisterPostsServiceServer(s, &server{})
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	srv := grpc.NewServer()
+	pb.RegisterPostsServiceServer(srv, &server{})
+	reflection.Register(srv)
+
+	if e := srv.Serve(lis); e != nil {
+		panic(err)
 	}
 }

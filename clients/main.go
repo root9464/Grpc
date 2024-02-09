@@ -1,37 +1,38 @@
 package main
 
 import (
-	"context"
 	"flag"
+	"fmt"
 	"log"
-	"time"
 
 	pb "root/proto"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
-	addr = flag.String("addr", "localhost:50051", "the address to connect to")
+	port = flag.Int("port", 3001, "The server port")
 )
 
 func main() {
-	flag.Parse()
-	// Set up a connection to the server.
-	conn, err := grpc.Dial(*addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
-	defer conn.Close()
-	c := pb.NewPostsServiceClient(conn)
+	app := fiber.New()
 
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	r, err := c.HelloWorld(ctx, &pb.HelloWorldResponse{Message: "hello world"})
+	app.Use(logger.New())
+	conn, err := grpc.Dial(fmt.Sprintf(":%d", *port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		panic(err)
 	}
-	log.Printf("Greeting: %s", r.GetMessage())
+	client := pb.NewPostsServiceClient(conn)
+	app.Get("/posts", func(c *fiber.Ctx) error {
+		helo, err := client.HelloWorld(c.Context(), &pb.HelloWorldResponse{Message: "Hello World"})
+		if err != nil {
+			return c.Status(500).SendString(err.Error())
+		}
+		return c.JSON(helo)
+	})
+
+	log.Fatal(app.Listen(":3000"))
 }
