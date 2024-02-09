@@ -16,7 +16,7 @@ var DB Data
 func ConnectToDB() (Data, error) {
 
 
-	dsn := "postgres://postgres.agozltsslyxdxyxewoul:8tmJqJL7exflHEFP@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+	dsn := ""
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
